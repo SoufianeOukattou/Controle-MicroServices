@@ -1,5 +1,6 @@
 package ma.emsi.ControleClient.repositories;
 
+
 import ma.emsi.ControleClient.entities.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

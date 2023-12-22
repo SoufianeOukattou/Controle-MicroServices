@@ -4,78 +4,60 @@ services:
     image: mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: root
-      #MYSQL_DATABASE: clientdb,voituredb
     ports:
       - "3306:3306"
+
   controle-server:
     container_name: controle-server
-    build: ./ControleServer
+    image: controle-server
     ports:
       - "8761:8761"
     expose:
       - "8761"
+    depends_on:
+      - mysql
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 10s
       retries: 3
+
   controle-client:
     container_name: controle-client
-    build: ./ControleClient
+    image: controle-client
     ports:
       - "8081:8081"
     expose:
       - "8081"
-
     depends_on:
-        controle-server:
-            condition: service_healthy
-        mysql:
-            condition: service_started
+      - controle-server
+      - mysql
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
       interval: 10s
       retries: 3
 
-
   controle-car:
     container_name: controle-car
-    build: ./ControleCar
+    image: controle-car
     ports:
       - "8082:8082"
     expose:
       - "8082"
-
     depends_on:
-      controle-server:
-        condition: service_healthy
-      mysql:
-        condition: service_started
-      controle-client:
-        condition: service_healthy
+      - controle-server
+      - mysql
+      - controle-client
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
       interval: 10s
       retries: 3
 
   controle-gateway:
     container_name: controle-gateway
-    build: ./ControleGateway
+    image: controle-gateway  # Assuming you have an image named "controle-gateway"
     ports:
       - "8888:8888"
     expose:
-        - "8888"
+      - "8888"
     depends_on:
-      controle-server:
-        condition: service_healthy
-
-
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "8090:80"
-
+      - controle-server
